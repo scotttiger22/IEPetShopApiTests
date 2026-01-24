@@ -1,6 +1,7 @@
 import allure
 import requests
 import jsonschema
+import pytest
 from .schemas.pet_schema import PET_SCHEMA
 
 BASE_URL = 'http://5.181.109.28:9090/api/v3'
@@ -138,3 +139,27 @@ class TestPet:
         with allure.step("Проверка статуса ответа удаленного питомца"):
             response = requests.get(url=f'{BASE_URL}/{pet_id}')
             assert response.status_code == 404, "Статус код не совпадает"
+
+    @allure.title("Получение списка питомцев по статусу")
+    @pytest.mark.parametrize(
+        "status, expectd_status_code",
+        [
+            ("available", 200),
+            ("pending", 200),
+            ("sold", 200),
+            ("", 400),
+            (12132136151, 400)
+        ]
+    )
+    def test_get_pets_by_status(self, status, expectd_status_code):
+        with allure.step(f"Отправка запроса на получение списка питомцев по статусу {status}"):
+            response = requests.get(url=f'{BASE_URL}/pet/findByStatus', params={"status": status})
+
+        with allure.step("Проверка статуса ответа и формата данных"):
+            assert response.status_code == expectd_status_code, "Статус код не совпадает"
+            if response.status_code == 200:
+                assert isinstance(response.json(), list), "Формат данных не совпадает"
+                assert response.json()[0]["status"] == status, "status питомца не совпадает с ожидаемым"
+                assert response.json()[-1]["status"] == status, "status питомца не совпадает с ожидаемым"
+            else:
+                assert isinstance(response.json(), dict), "Формат данных не совпадает"
