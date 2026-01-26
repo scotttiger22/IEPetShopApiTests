@@ -43,13 +43,15 @@ class TestStore:
             assert response.json()["complete"] == create_order["complete"]
 
     @allure.title("Удаление заказа по ID")
-    def test_delete_order(self):
+    def test_delete_order(self, create_order):
+        with allure.step("Получение ID созданного питомца"):
+            pet_id = create_order["id"]
         with allure.step('Отправка запроса на удаление заказа по ID'):
-            response = requests.delete(url=f'{BASE_URL}/store/order/1')
+            response = requests.delete(url=f'{BASE_URL}/store/order/{pet_id}')
         with allure.step('Проверка статуса ответа'):
             assert response.status_code == 200, "Статус код не совпадает"
         with allure.step('Отправка запроса на проверку получения информации по удаленному заказу'):
-            response = requests.get(url=f'{BASE_URL}/store/order/1')
+            response = requests.get(url=f'{BASE_URL}/store/order/{pet_id}')
             assert response.status_code
             assert response.text == 'Order not found'
 
@@ -62,7 +64,7 @@ class TestStore:
             assert response.status_code == 404
             assert response.text == 'Order not found'
 
-    @allure.title("Попытка получить информацию о несуществующем заказе ")
+    @allure.title("Получение инвентаря магазина")
     def test_get_inventory(self):
         with allure.step("Отправка запроса на получиние информации о несуществующем заказе "):
             response = requests.get(url=f'{BASE_URL}/store/inventory')
