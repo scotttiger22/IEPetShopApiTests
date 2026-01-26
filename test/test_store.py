@@ -2,6 +2,7 @@ import allure
 import requests
 import jsonschema
 import pytest
+from .schemas.store_schema import STORE_SCHEMA
 
 BASE_URL = "http://5.181.109.28:9090/api/v3"
 
@@ -66,7 +67,9 @@ class TestStore:
         with allure.step("Отправка запроса на получиние информации о несуществующем заказе "):
             response = requests.get(url=f'{BASE_URL}/store/inventory')
         with allure.step('Проверка статуса ответа'):
-            assert response.status_code == 500
+            assert response.status_code == 200
+            jsonschema.validate(response.json(), STORE_SCHEMA)
+
 
 
 
