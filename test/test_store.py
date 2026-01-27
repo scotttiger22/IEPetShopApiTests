@@ -2,7 +2,7 @@ import allure
 import requests
 import jsonschema
 import pytest
-from .schemas.store_schema import STORE_SCHEMA
+from .schemas.store_schema import INVENTORY_SCHEMA, ORDER_SCHEMA
 
 BASE_URL = "http://5.181.109.28:9090/api/v3"
 
@@ -23,6 +23,7 @@ class TestStore:
             response_json = response.json()
         with allure.step("Проверка статуса ответа и валидации JSON-схемы"):
             assert response.status_code == 200, "Статус код не совпадает"
+            jsonschema.validate(response_json, ORDER_SCHEMA)
             assert response_json["id"] == payload["id"]
             assert response_json["petId"] == payload["petId"]
             assert response_json["quantity"] == payload["quantity"]
@@ -70,7 +71,7 @@ class TestStore:
             response = requests.get(url=f'{BASE_URL}/store/inventory')
         with allure.step('Проверка статуса ответа'):
             assert response.status_code == 200
-            jsonschema.validate(response.json(), STORE_SCHEMA)
+            jsonschema.validate(response.json(), INVENTORY_SCHEMA)
 
 
 
